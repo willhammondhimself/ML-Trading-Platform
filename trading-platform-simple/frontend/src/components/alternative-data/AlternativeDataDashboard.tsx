@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useWebSocket } from '@/hooks/useWebSocket';
 import {
   Box,
   Card,
@@ -78,6 +79,7 @@ function TabPanel(props: TabPanelProps) {
 const SatelliteAnalysisTab: React.FC = () => {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { socket } = useWebSocket();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -93,9 +95,22 @@ const SatelliteAnalysisTab: React.FC = () => {
     };
 
     fetchData();
-    const interval = setInterval(fetchData, 300000); // Update every 5 minutes
-    return () => clearInterval(interval);
-  }, []);
+    
+    // Listen for real-time updates via WebSocket
+    if (socket) {
+      const handleUpdate = () => {
+        fetchData(); // Refresh data when updates are received
+      };
+      
+      socket.on('satellite-analysis-updated', handleUpdate);
+      socket.on('macro-indicators-updated', handleUpdate);
+      
+      return () => {
+        socket.off('satellite-analysis-updated', handleUpdate);
+        socket.off('macro-indicators-updated', handleUpdate);
+      };
+    }
+  }, [socket]);
 
   if (loading) return <CircularProgress />;
   if (!data) return <Alert severity="error">Failed to load satellite data</Alert>;
@@ -288,6 +303,7 @@ const SatelliteAnalysisTab: React.FC = () => {
 const SocialSentimentTab: React.FC = () => {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { socket } = useWebSocket();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -303,9 +319,20 @@ const SocialSentimentTab: React.FC = () => {
     };
 
     fetchData();
-    const interval = setInterval(fetchData, 60000); // Update every minute
-    return () => clearInterval(interval);
-  }, []);
+    
+    // Listen for real-time updates via WebSocket
+    if (socket) {
+      const handleUpdate = () => {
+        fetchData(); // Refresh data when updates are received
+      };
+      
+      socket.on('social-sentiment-updated', handleUpdate);
+      
+      return () => {
+        socket.off('social-sentiment-updated', handleUpdate);
+      };
+    }
+  }, [socket]);
 
   if (loading) return <CircularProgress />;
   if (!data) return <Alert severity="error">Failed to load social sentiment data</Alert>;
@@ -537,6 +564,7 @@ const SocialSentimentTab: React.FC = () => {
 const EconomicIndicatorsTab: React.FC = () => {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { socket } = useWebSocket();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -552,9 +580,20 @@ const EconomicIndicatorsTab: React.FC = () => {
     };
 
     fetchData();
-    const interval = setInterval(fetchData, 300000); // Update every 5 minutes
-    return () => clearInterval(interval);
-  }, []);
+    
+    // Listen for real-time updates via WebSocket
+    if (socket) {
+      const handleUpdate = () => {
+        fetchData(); // Refresh data when updates are received
+      };
+      
+      socket.on('economic-indicators-updated', handleUpdate);
+      
+      return () => {
+        socket.off('economic-indicators-updated', handleUpdate);
+      };
+    }
+  }, [socket]);
 
   if (loading) return <CircularProgress />;
   if (!data) return <Alert severity="error">Failed to load economic data</Alert>;
@@ -801,6 +840,7 @@ const EconomicIndicatorsTab: React.FC = () => {
 const EarningsSentimentTab: React.FC = () => {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { socket } = useWebSocket();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -816,9 +856,20 @@ const EarningsSentimentTab: React.FC = () => {
     };
 
     fetchData();
-    const interval = setInterval(fetchData, 300000); // Update every 5 minutes
-    return () => clearInterval(interval);
-  }, []);
+    
+    // Listen for real-time updates via WebSocket
+    if (socket) {
+      const handleUpdate = () => {
+        fetchData(); // Refresh data when updates are received
+      };
+      
+      socket.on('earnings-sentiment-updated', handleUpdate);
+      
+      return () => {
+        socket.off('earnings-sentiment-updated', handleUpdate);
+      };
+    }
+  }, [socket]);
 
   if (loading) return <CircularProgress />;
   if (!data) return <Alert severity="error">Failed to load earnings data</Alert>;

@@ -20,6 +20,10 @@ import { satelliteAnalysisRoutes } from './routes/satelliteAnalysis';
 import { socialSentimentRoutes } from './routes/socialSentiment';
 import { economicIndicatorsRoutes } from './routes/economicIndicators';
 import { earningsSentimentRoutes } from './routes/earningsSentiment';
+import { SatelliteAnalysisService } from './services/satelliteAnalysis';
+import { SocialSentimentService } from './services/socialSentiment';
+import { EconomicIndicatorsService } from './services/economicIndicators';
+import { EarningsSentimentService } from './services/earningsSentiment';
 import { WebSocketService } from './services/websocket';
 import { MarketDataService } from './services/marketData';
 import { RealMarketDataService } from './services/realMarketData';
@@ -84,6 +88,12 @@ const realMarketDataService = new RealMarketDataService();
 const sentimentService = new SentimentAnalysisService();
 const websocketService = new WebSocketService(io, marketDataService, realMarketDataService);
 
+// Initialize alternative data services
+const satelliteService = new SatelliteAnalysisService();
+const socialService = new SocialSentimentService();
+const economicService = new EconomicIndicatorsService();
+const earningsService = new EarningsSentimentService();
+
 // Start server
 server.listen(PORT, () => {
   logger.info(`🚀 Trading Platform Backend running on port ${PORT}`);
@@ -103,6 +113,27 @@ server.listen(PORT, () => {
   
   sentimentService.on('market-sentiment', (data) => {
     io.emit('market-sentiment', data);
+  });
+  
+  // Forward alternative data events to WebSocket clients
+  satelliteService.on('analysis-updated', (data) => {
+    io.emit('satellite-analysis-updated', data);
+  });
+  
+  satelliteService.on('macro-updated', (data) => {
+    io.emit('macro-indicators-updated', data);
+  });
+  
+  socialService.on('sentiment-updated', (data) => {
+    io.emit('social-sentiment-updated', data);
+  });
+  
+  economicService.on('indicators-updated', (data) => {
+    io.emit('economic-indicators-updated', data);
+  });
+  
+  earningsService.on('earnings-updated', (data) => {
+    io.emit('earnings-sentiment-updated', data);
   });
   
   // Start real market data updates if API keys are available

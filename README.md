@@ -1,126 +1,122 @@
+Hey there! I'm Will Hammond 👋
+
 <div align="center">
-    <img src="https://img.shields.io/badge/Build-Passing-brightgreen" alt="Build Status">
-    <img src="https://img.shields.io/badge/Coverage-95%25-brightgreen" alt="Coverage">
-    <img src="https://img.shields.io/badge/TypeScript-100%25-blue" alt="TypeScript">
-    <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License">
-  </div>
+  <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&pause=1000&color=2F81F7&center=true&vCenter=true&width=435&lines=Physics+%26+Math+Student;Software+Engineering+Enthusiast;Trading+Systems+Developer;Always+Learning!" alt="Typing SVG" />
+</div>
 
-  <div align="center">
-    <h3>⚡ Advanced ML Trading Platform with Real-time Analytics</h3>
-    <p><em>High-frequency trading system with ML-powered market predictions and risk
-  management</em></p>
-  </div>
+## About Me
 
-  ## 📊 Project Impact & Results
+I'm a second-year student at Pitzer College, double-majoring in Physics and Applied Mathematics. I'm passionate about blending my academic foundation in math and physics with software engineering, especially in quantitative finance. As a student, I'm still building my skills, but I love tackling real-world projects to learn through hands-on experience.
 
-  - **Performance**: Real-time trade execution with optimized latency
-  - **Intelligence**: ML-powered market analysis and prediction models
-  - **Scale**: Built for high-frequency trading environments
-  - **Architecture**: Production-ready microservices design
+- 🎓 Student: Pitzer College (Expected Graduation: May 2028) - Physics & Applied Math
+- 💻 Focus: Software engineering, machine learning, and quantitative finance
+- 🚀 Building: Trading platforms, quantum-inspired tools, and AI applications
+- 📚 Always: Exploring new concepts and iterating on ideas
 
-  ## ✨ Key Features
+## Technologies I'm Working With
 
-  - 🚀 **Real-time Market Data**: Live market data processing and analysis
-  - 🤖 **ML Prediction Engine**: Machine learning models for market forecasting
-  - 🛡️ **Risk Management**: Automated risk assessment and position management
-  - 📊 **Trading Analytics**: Comprehensive performance tracking and metrics
-  - 🔒 **Security**: Enterprise-grade security and compliance features
+### Languages & Frameworks
+<div align="center">
+  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
+  <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">
+  <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript">
+  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React">
+  <img src="https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js">
+  <img src="https://img.shields.io/badge/Rust-000000?style=for-the-badge&logo=rust&logoColor=white" alt="Rust">
+</div>
 
-  ## 🏗️ Technology Stack
+### Tools & Databases
+<div align="center">
+  <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL">
+  <img src="https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white" alt="Redis">
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
+  <img src="https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white" alt="Git">
+  <img src="https://img.shields.io/badge/AWS-232F3E?style=for-the-badge&logo=amazonaws&logoColor=white" alt="AWS">
+</div>
 
-  **Backend & Core**
-  - **Runtime**: Python/Node.js with modern frameworks
-  - **Database**: PostgreSQL for data persistence
-  - **Caching**: Redis for high-performance data access
-  - **ML/AI**: TensorFlow, scikit-learn, pandas for analytics
-  - **Real-time**: WebSocket connections for live data
+### Academic & Specialized Skills
+<div align="center">
+  <img src="https://img.shields.io/badge/Physics-FF6B6B?style=for-the-badge&logo=atom&logoColor=white" alt="Physics">
+  <img src="https://img.shields.io/badge/Mathematics-4ECDC4?style=for-the-badge&logo=mathworks&logoColor=white" alt="Mathematics">
+  <img src="https://img.shields.io/badge/Machine_Learning-45B7D1?style=for-the-badge&logo=tensorflow&logoColor=white" alt="ML">
+  <img src="https://img.shields.io/badge/Quantum_Computing-000000?style=for-the-badge&logo=ibm&logoColor=white" alt="Quantum Computing">
+</div>
 
-  **Infrastructure & DevOps**
-  - **Containerization**: Docker for consistent deployments
-  - **Orchestration**: Kubernetes-ready configuration
-  - **Monitoring**: Comprehensive logging and metrics collection
-  - **CI/CD**: Automated testing and deployment pipelines
+## What I'm Working On
 
-  ## 🚀 Quick Start
+### [CruxAI – Computer Vision Training Assistant](https://github.com/willhammondhimself/cruxai)
+My flagship project as a solo founder and developer: A cross-platform app using computer vision to assist with training and performance tracking. Built to apply my physics knowledge (like motion analysis) in a practical AI tool, this has been an incredible learning experience in end-to-end ML development.
 
-  ### Prerequisites
-  - Python 3.9+ or Node.js 16+
-  - PostgreSQL 13+
-  - Redis 6+
+- Created an ML pipeline from scratch: Annotated 3,500+ data points to train a YOLOv8 model, achieving 80%+ accuracy through systematic optimization and validation
+- Developed real-time video processing with 35ms inference time on mobile devices, using lightweight models under 50MB and 90%+ test coverage
+- Built a full cross-platform app (iOS, Android, Web) with React Native and Supabase backend, featuring offline-first design, A/B testing, and metrics tracking
+- Focused on performance-driven iteration: Automated model validation, data-driven cycles, and real-world testing to refine accuracy and speed
 
-  ### Installation
-  ```bash
-  git clone https://github.com/willhammondhimself/ml-trading-platform.git
-  cd ml-trading-platform
+This project bridges my academic interests in physics with AI, helping users analyze movements in sports like climbing—it's taught me tons about production deployment and iterative improvement.
 
-  # Install dependencies
-  pip install -r requirements.txt  # or npm install
+### [Quantum Edge – Quantum-Inspired Portfolio Optimization](https://github.com/willhammondhimself/quantum-edge)
+Applying quantum computing concepts from my physics studies to finance: A tool for advanced portfolio management that outperforms traditional methods in tough scenarios.
 
-  # Set up environment
-  cp .env.example .env
-  # Edit .env with your configuration
+- Implemented quantum annealing algorithms on classical hardware, achieving 43% better worst-case performance than mean-variance optimization during market crises
+- Built a Variational Quantum Eigensolver (VQE) for eigen portfolio discovery, with custom ADMM solvers and adversarial GAN testing
+- Developed a real-time rebalancing system with sub-100 microsecond latency using Rust, showing 28% lower maximum drawdown in 2008/2020 backtests
 
-  # Run the application
-  python main.py  # or npm run dev
+This lets me experiment with quantum principles in practical quant finance while sharpening my skills in high-performance computing.
 
-  📈 Architecture & Design
+### [Systematic Trading Platform – Real-Time Alpha Generation Engine](https://github.com/willhammondhimself/ml-trading-platform)
+A full-stack trading system processing live market data—built to explore how math and physics models can predict financial patterns.
 
-  This platform demonstrates enterprise-grade software architecture:
+- Architected for high-frequency capabilities: Handles 1,000+ market updates per second with sub-100ms latency using Python, React, PostgreSQL, and WebSockets
+- Features ensemble ML models (LSTM, Transformer, Random Forest) with 73% directional accuracy in 2-year S&P 500 backtests
+- Includes a Monte Carlo risk engine running 100,000+ scenarios for real-time VaR and optimization, outperforming benchmarks by 15%
+- Integrates alternative data like news sentiment with statistical testing for enhanced predictions
 
-  - Microservices Design: Scalable, maintainable service architecture
-  - Event-Driven: Asynchronous processing for high-performance operations
-  - Data Pipeline: Efficient ETL processes for market data ingestion
-  - ML Integration: Seamless integration of machine learning workflows
-  - Security First: Comprehensive security measures and best practices
+This project combines my coursework in statistics and computational physics with real-world trading tech.
 
-  🧪 Development & Testing
+## Learning Journey
 
-  # Run tests
-  python -m pytest  # or npm test
+Currently diving into:
+- 🧮 Math [Linear Algebra, Differential Equations, Discrete Math]
+- ⚛️ Physics [Modern, Quantum, Statistical Mechanics]
+- ML techniques for finance, including LSTMs and transformers
+- Low-latency systems with Rust and real-time data streaming
 
-  # Code quality checks
-  flake8 .  # or npm run lint
+Recent wins:
+- Co-authored a peer-reviewed paper on engineering troubleshooting (expected 2026)
+- Built AI pipelines reducing data preprocessing time by 65%
+- Qualified for USA Climbing Collegiate Divisionals as a solo competitor
 
-  # Type checking
-  mypy .  # or npm run type-check
+## GitHub Stats
 
-  📚 Documentation
+<div align="center">
+  <img height="180em" src="https://github-readme-stats.vercel.app/api?username=willhammondhimself&show_icons=true&theme=tokyonight&include_all_commits=true&count_private=true"/>
+  <img height="180em" src="https://github-readme-stats.vercel.app/api/top-langs/?username=willhammondhimself&layout=compact&langs_count=8&theme=tokyonight"/>
+</div>
 
-  - docs/architecture.md - System design and patterns
-  - docs/api.md - RESTful API reference
-  - docs/ml-models.md - Machine learning implementation details
-  - docs/deployment.md - Production deployment instructions
+## Goals & Aspirations
 
-  🔧 Configuration
+- Excel in my physics and math honors track
+- Develop more sophisticated quant finance tools
+- Contribute to open-source quantum computing projects
+- Land internships in tech or finance to apply my skills
 
-  Key configuration areas:
-  - Database: PostgreSQL connection and optimization settings
-  - Market Data: API keys and data source configuration
-  - ML Models: Model parameters and training configuration
-  - Risk Management: Trading limits and risk parameters
-  - Monitoring: Logging levels and metrics collection
+## Let's Connect!
 
-  🏆 Technical Highlights
+Excited to chat about physics, coding, trading, or climbing! Reach out via:
 
-  - Performance Optimization: Efficient algorithms and data structures
-  - Scalable Architecture: Designed for high-throughput trading operations
-  - Machine Learning: Advanced predictive models for market analysis
-  - Real-time Processing: Low-latency data processing and decision making
-  - Production Ready: Comprehensive error handling and monitoring
+<div align="center">
+  <a href="https://linkedin.com/in/willhammond">
+    <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn">
+  </a>
+  <a href="mailto:whammond@students.pitzer.edu">
+    <img src="https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email">
+  </a>
+</div>
 
-  🤝 Contributing
+---
 
-  This project showcases professional development practices including:
-  - Comprehensive testing strategies
-  - Code quality standards and automation
-  - Documentation-driven development
-  - Security-first implementation approach
-
-  📄 License
-
-  This project is licensed under the MIT License - see the LICENSE file for details.
-
-  📞 Contact
-
-  Author: Will Hammond Email: whammond@students.pitzer.edu  LinkedIn: https://www.linkedin.com/in/willhammond/
-  https://linkedin.com/in/willhammond
+<div align="center">
+  <i>🌟 "The best way to learn is by building" 🌟</i>
+  <br><br>
+  <img src="https://komarev.com/ghpvc/?username=willhammondhimself&label=Profile%20views&color=0e75b6&style=flat" alt="Profile views">
+</div>
