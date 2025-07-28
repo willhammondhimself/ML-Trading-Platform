@@ -19,6 +19,7 @@ import { riskManagementRoutes } from './routes/riskManagement';
 import { satelliteAnalysisRoutes } from './routes/satelliteAnalysis';
 import { socialSentimentRoutes } from './routes/socialSentiment';
 import { economicIndicatorsRoutes } from './routes/economicIndicators';
+import { earningsSentimentRoutes } from './routes/earningsSentiment';
 import { WebSocketService } from './services/websocket';
 import { MarketDataService } from './services/marketData';
 import { RealMarketDataService } from './services/realMarketData';
@@ -75,6 +76,7 @@ app.use('/api/risk-management', riskManagementRoutes);
 app.use('/api/satellite-analysis', satelliteAnalysisRoutes);
 app.use('/api/social-sentiment', socialSentimentRoutes);
 app.use('/api/economic-indicators', economicIndicatorsRoutes);
+app.use('/api/earnings-sentiment', earningsSentimentRoutes);
 
 // Initialize services
 const marketDataService = new MarketDataService();

@@ -16,6 +16,7 @@ import { PerformanceDashboard } from './PerformanceDashboard';
 import { BacktestingDashboard } from './BacktestingDashboard';
 import { AdvancedMLDashboard } from './AdvancedMLDashboard';
 import { RiskManagementDashboard } from './RiskManagementDashboard';
+import AlternativeDataDashboard from '../alternative-data/AlternativeDataDashboard';
 import { LoadingSkeleton } from '../ui/LoadingSkeleton';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import type { TradingDashboardProps } from '@/types/trading';
@@ -244,7 +245,7 @@ function TradingTabs({
   selectedSymbol: string; 
   enableML: boolean;
 }) {
-  const [activeTab, setActiveTab] = useState<'trades' | 'ml' | 'sentiment' | 'alerts' | 'performance' | 'backtesting' | 'advanced-ml' | 'risk'>('trades');
+  const [activeTab, setActiveTab] = useState<'trades' | 'ml' | 'sentiment' | 'alerts' | 'performance' | 'backtesting' | 'advanced-ml' | 'risk' | 'alternative-data'>('trades');
 
   const tabs = [
     { 
@@ -286,6 +287,11 @@ function TradingTabs({
       id: 'risk' as const, 
       label: 'Risk Management', 
       component: () => <RiskManagementDashboard />
+    },
+    { 
+      id: 'alternative-data' as const, 
+      label: 'Alternative Data', 
+      component: () => <AlternativeDataDashboard />
     },
   ];
 
