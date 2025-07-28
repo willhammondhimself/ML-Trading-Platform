@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ml-trading-platform
+  labels:
+    name: ml-trading-platform
+    app.kubernetes.io/name: ml-trading-platform
+    app.kubernetes.io/version: "1.0.0"

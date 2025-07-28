@@ -1,0 +1,234 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: zookeeper-pvc
+  namespace: ml-trading-platform
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: standard
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: kafka-pvc
+  namespace: ml-trading-platform
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zookeeper
+  namespace: ml-trading-platform
+  labels:
+    app: zookeeper
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zookeeper
+  template:
+    metadata:
+      labels:
+        app: zookeeper
+    spec:
+      containers:
+      - name: zookeeper
+        image: confluentinc/cp-zookeeper:7.5.0
+        ports:
+        - containerPort: 2181
+        env:
+        - name: ZOOKEEPER_CLIENT_PORT
+          value: "2181"
+        - name: ZOOKEEPER_TICK_TIME
+          value: "2000"
+        volumeMounts:
+        - name: zookeeper-storage
+          mountPath: /var/lib/zookeeper/data
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: zookeeper-storage
+        persistentVolumeClaim:
+          claimName: zookeeper-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zookeeper
+  namespace: ml-trading-platform
+  labels:
+    app: zookeeper
+spec:
+  type: ClusterIP
+  ports:
+  - port: 2181
+    targetPort: 2181
+    protocol: TCP
+  selector:
+    app: zookeeper
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka
+  namespace: ml-trading-platform
+  labels:
+    app: kafka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      containers:
+      - name: kafka
+        image: confluentinc/cp-kafka:7.5.0
+        ports:
+        - containerPort: 9092
+        - containerPort: 29092
+        env:
+        - name: KAFKA_BROKER_ID
+          value: "1"
+        - name: KAFKA_ZOOKEEPER_CONNECT
+          value: "zookeeper:2181"
+        - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+          value: "PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT"
+        - name: KAFKA_ADVERTISED_LISTENERS
+          value: "PLAINTEXT://kafka:29092,PLAINTEXT_HOST://kafka:9092"
+        - name: KAFKA_INTER_BROKER_LISTENER_NAME
+          value: "PLAINTEXT"
+        - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+          value: "1"
+        - name: KAFKA_AUTO_CREATE_TOPICS_ENABLE
+          value: "true"
+        - name: KAFKA_LOG_RETENTION_HOURS
+          value: "168" # 7 days
+        - name: KAFKA_LOG_RETENTION_BYTES
+          value: "1073741824" # 1GB
+        volumeMounts:
+        - name: kafka-storage
+          mountPath: /var/lib/kafka/data
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        livenessProbe:
+          exec:
+            command:
+            - kafka-topics
+            - --bootstrap-server
+            - localhost:9092
+            - --list
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          exec:
+            command:
+            - kafka-topics
+            - --bootstrap-server
+            - localhost:9092
+            - --list
+          initialDelaySeconds: 30
+          periodSeconds: 10
+      volumes:
+      - name: kafka-storage
+        persistentVolumeClaim:
+          claimName: kafka-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka
+  namespace: ml-trading-platform
+  labels:
+    app: kafka
+spec:
+  type: ClusterIP
+  ports:
+  - name: kafka-internal
+    port: 29092
+    targetPort: 29092
+    protocol: TCP
+  - name: kafka-external
+    port: 9092
+    targetPort: 9092
+    protocol: TCP
+  selector:
+    app: kafka
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-topics
+  namespace: ml-trading-platform
+data:
+  create-topics.sh: |
+    #!/bin/bash
+    # Wait for Kafka to be ready
+    sleep 30
+    
+    # Create topics for the trading platform
+    kafka-topics --create --bootstrap-server kafka:9092 --topic market-data --partitions 10 --replication-factor 1
+    kafka-topics --create --bootstrap-server kafka:9092 --topic order-events --partitions 5 --replication-factor 1
+    kafka-topics --create --bootstrap-server kafka:9092 --topic trade-events --partitions 5 --replication-factor 1
+    kafka-topics --create --bootstrap-server kafka:9092 --topic position-events --partitions 3 --replication-factor 1
+    kafka-topics --create --bootstrap-server kafka:9092 --topic risk-events --partitions 3 --replication-factor 1
+    kafka-topics --create --bootstrap-server kafka:9092 --topic ml-predictions --partitions 5 --replication-factor 1
+    kafka-topics --create --bootstrap-server kafka:9092 --topic user-events --partitions 3 --replication-factor 1
+    kafka-topics --create --bootstrap-server kafka:9092 --topic notifications --partitions 3 --replication-factor 1
+    kafka-topics --create --bootstrap-server kafka:9092 --topic alt-data --partitions 5 --replication-factor 1
+    
+    echo "Topics created successfully"
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kafka-topics-init
+  namespace: ml-trading-platform
+spec:
+  template:
+    spec:
+      containers:
+      - name: kafka-topics-init
+        image: confluentinc/cp-kafka:7.5.0
+        command: ["/bin/bash"]
+        args: ["/scripts/create-topics.sh"]
+        volumeMounts:
+        - name: scripts
+          mountPath: /scripts
+      volumes:
+      - name: scripts
+        configMap:
+          name: kafka-topics
+          defaultMode: 0755
+      restartPolicy: OnFailure
+  backoffLimit: 4

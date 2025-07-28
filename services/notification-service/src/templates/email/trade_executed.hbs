@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trade Executed - {{platformName}}</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px 20px; text-align: center; }
+        .content { padding: 30px 20px; }
+        .trade-details { background-color: #f8f9fa; border-radius: 8px; padding: 20px; margin: 20px 0; }
+        .detail-row { display: flex; justify-content: space-between; margin: 10px 0; padding: 8px 0; border-bottom: 1px solid #e9ecef; }
+        .detail-label { font-weight: 600; color: #495057; }
+        .detail-value { color: #212529; }
+        .success { color: #28a745; font-weight: bold; }
+        .footer { background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #6c757d; }
+        .button { display: inline-block; padding: 12px 24px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; margin: 15px 0; }
+        @media (max-width: 600px) { .container { width: 100% !important; } .detail-row { flex-direction: column; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Trade Executed Successfully</h1>
+            <p>Your trade has been processed</p>
+        </div>
+        
+        <div class="content">
+            <p>Hello {{firstName}},</p>
+            
+            <p>We're pleased to confirm that your trade has been executed successfully.</p>
+            
+            <div class="trade-details">
+                <h3 style="margin-top: 0; color: #495057;">Trade Details</h3>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Order ID:</span>
+                    <span class="detail-value">{{orderId}}</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Symbol:</span>
+                    <span class="detail-value">{{symbol}}</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Side:</span>
+                    <span class="detail-value">{{side}}</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Quantity:</span>
+                    <span class="detail-value">{{quantity}}</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Price:</span>
+                    <span class="detail-value">{{formatCurrency price}}</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Total Value:</span>
+                    <span class="detail-value">{{formatCurrency totalValue}}</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Execution Time:</span>
+                    <span class="detail-value">{{formatDate executionTime 'long'}}</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Status:</span>
+                    <span class="detail-value success">{{status}}</span>
+                </div>
+            </div>
+            
+            {{#if fees}}
+            <div class="trade-details">
+                <h3 style="margin-top: 0; color: #495057;">Fee Breakdown</h3>
+                
+                {{#each fees}}
+                <div class="detail-row">
+                    <span class="detail-label">{{this.type}}:</span>
+                    <span class="detail-value">{{formatCurrency this.amount}}</span>
+                </div>
+                {{/each}}
+            </div>
+            {{/if}}
+            
+            <p>You can view detailed information about this trade and your portfolio performance in your dashboard.</p>
+            
+            <div style="text-align: center;">
+                <a href="{{dashboardUrl}}" class="button">View Portfolio</a>
+            </div>
+            
+            <p><strong>Important Notes:</strong></p>
+            <ul>
+                <li>This trade confirmation is for your records</li>
+                <li>Settlement will occur according to market rules</li>
+                <li>Contact support if you have any questions</li>
+            </ul>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; {{year}} {{platformName}}. All rights reserved.</p>
+            <p>
+                <a href="{{preferencesUrl}}" style="color: #6c757d;">Notification Preferences</a> | 
+                <a href="{{unsubscribeUrl}}" style="color: #6c757d;">Unsubscribe</a> | 
+                <a href="mailto:{{supportEmail}}" style="color: #6c757d;">Support</a>
+            </p>
+            <p style="margin-top: 15px; font-size: 11px;">
+                This is an automated message. Please do not reply to this email.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

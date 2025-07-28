@@ -1,0 +1,336 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
+@layer base {
+  :root {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 217.2 32.6% 17.5%;
+    --card-foreground: 210 40% 98%;
+    --popover: 217.2 32.6% 17.5%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 84% 4.9%;
+    --secondary: 215.3 25% 26.7%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 215.3 19.3% 34.5%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 263.4 70% 50.4%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 215 27.9% 16.9%;
+    --input: 215 27.9% 16.9%;
+    --ring: 217.2 91.2% 59.8%;
+    --radius: 0.5rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Custom scrollbar for dark theme */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-trading-bg-secondary;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-trading-neutral-600 rounded-md;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-trading-neutral-500;
+  }
+
+  /* Firefox scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(215.3 25% 26.7%) hsl(217.2 32.6% 17.5%);
+  }
+}
+
+@layer components {
+  /* Trading-specific component classes */
+  .trading-card {
+    @apply bg-trading-bg-secondary border border-trading-neutral-700 rounded-lg shadow-trading;
+  }
+
+  .trading-button-primary {
+    @apply bg-trading-accent-blue hover:bg-trading-accent-blue/90 text-white font-medium px-4 py-2 rounded-md transition-colors;
+  }
+
+  .trading-button-secondary {
+    @apply bg-trading-bg-tertiary hover:bg-trading-neutral-600 text-trading-text-primary border border-trading-neutral-700 font-medium px-4 py-2 rounded-md transition-colors;
+  }
+
+  .trading-input {
+    @apply bg-trading-bg-tertiary border border-trading-neutral-700 text-trading-text-primary placeholder-trading-text-muted rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-trading-accent-blue focus:border-transparent;
+  }
+
+  .price-up {
+    @apply text-trading-success-500;
+  }
+
+  .price-down {
+    @apply text-trading-danger-500;
+  }
+
+  .price-neutral {
+    @apply text-trading-text-secondary;
+  }
+
+  .trading-layout-grid {
+    @apply grid grid-cols-trading-layout gap-4 h-screen p-4;
+  }
+
+  .trading-sidebar {
+    @apply trading-card p-4 overflow-y-auto;
+  }
+
+  .trading-main {
+    @apply space-y-4 overflow-hidden;
+  }
+
+  .trading-panel {
+    @apply trading-card p-4 overflow-y-auto;
+  }
+
+  /* Loading states */
+  .skeleton {
+    @apply animate-pulse bg-trading-neutral-700 rounded;
+  }
+
+  .loading-dots::after {
+    content: '.';
+    animation: dots 1.5s steps(5, end) infinite;
+  }
+
+  @keyframes dots {
+    0%, 20% {
+      color: rgba(0,0,0,0);
+      text-shadow:
+        .25em 0 0 rgba(0,0,0,0),
+        .5em 0 0 rgba(0,0,0,0);
+    }
+    40% {
+      color: white;
+      text-shadow:
+        .25em 0 0 rgba(0,0,0,0),
+        .5em 0 0 rgba(0,0,0,0);
+    }
+    60% {
+      text-shadow:
+        .25em 0 0 white,
+        .5em 0 0 rgba(0,0,0,0);
+    }
+    80%, 100% {
+      text-shadow:
+        .25em 0 0 white,
+        .5em 0 0 white;
+    }
+  }
+
+  /* Chart container styles */
+  .chart-container {
+    @apply w-full h-full min-h-[400px] bg-trading-bg-tertiary rounded-lg overflow-hidden;
+  }
+
+  .tradingview-widget-container {
+    @apply w-full h-full;
+  }
+
+  /* Order book styles */
+  .order-book-row {
+    @apply grid grid-cols-3 gap-2 px-2 py-1 text-sm font-mono hover:bg-trading-neutral-800/50 transition-colors;
+  }
+
+  .order-book-header {
+    @apply order-book-row font-semibold text-trading-text-secondary bg-trading-neutral-800 sticky top-0;
+  }
+
+  .order-book-bid {
+    @apply border-l-2 border-trading-success-500/30;
+  }
+
+  .order-book-ask {
+    @apply border-l-2 border-trading-danger-500/30;
+  }
+
+  /* Position and P&L styles */
+  .pnl-positive {
+    @apply text-trading-success-500 font-semibold;
+  }
+
+  .pnl-negative {
+    @apply text-trading-danger-500 font-semibold;
+  }
+
+  .pnl-neutral {
+    @apply text-trading-text-secondary font-semibold;
+  }
+
+  /* Trading form styles */
+  .trading-form-section {
+    @apply space-y-3 p-4 border-b border-trading-neutral-700 last:border-b-0;
+  }
+
+  .trading-form-label {
+    @apply block text-sm font-medium text-trading-text-secondary mb-1;
+  }
+
+  .trading-form-input {
+    @apply trading-input w-full;
+  }
+
+  .trading-form-select {
+    @apply trading-input w-full cursor-pointer;
+  }
+
+  /* Status indicators */
+  .status-indicator {
+    @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
+  }
+
+  .status-online {
+    @apply status-indicator bg-trading-success-500/20 text-trading-success-500;
+  }
+
+  .status-offline {
+    @apply status-indicator bg-trading-danger-500/20 text-trading-danger-500;
+  }
+
+  .status-warning {
+    @apply status-indicator bg-trading-warning-500/20 text-trading-warning-500;
+  }
+
+  /* Notification styles */
+  .notification-success {
+    @apply bg-trading-success-500/10 border border-trading-success-500/20 text-trading-success-500;
+  }
+
+  .notification-error {
+    @apply bg-trading-danger-500/10 border border-trading-danger-500/20 text-trading-danger-500;
+  }
+
+  .notification-warning {
+    @apply bg-trading-warning-500/10 border border-trading-warning-500/20 text-trading-warning-500;
+  }
+
+  .notification-info {
+    @apply bg-trading-accent-blue/10 border border-trading-accent-blue/20 text-trading-accent-blue;
+  }
+}
+
+@layer utilities {
+  /* Hide scrollbar while keeping functionality */
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Glassmorphism effect */
+  .glass {
+    @apply backdrop-blur-sm bg-white/5 border border-white/10;
+  }
+
+  /* Text gradient utilities */
+  .text-gradient-primary {
+    @apply bg-gradient-to-r from-trading-accent-blue to-trading-accent-purple bg-clip-text text-transparent;
+  }
+
+  /* Focus ring utilities */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-trading-accent-blue focus:ring-offset-2 focus:ring-offset-trading-bg-primary;
+  }
+
+  /* Transition utilities */
+  .transition-smooth {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  /* Layout utilities */
+  .full-bleed {
+    width: 100vw;
+    margin-left: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* Performance optimizations */
+  .gpu-accelerated {
+    transform: translateZ(0);
+    will-change: transform;
+  }
+}
+
+/* Trading-specific animations */
+@keyframes price-flash-up {
+  0% { background-color: transparent; }
+  50% { background-color: hsl(142.1 76.2% 36.3% / 0.3); }
+  100% { background-color: transparent; }
+}
+
+@keyframes price-flash-down {
+  0% { background-color: transparent; }
+  50% { background-color: hsl(0 84.2% 60.2% / 0.3); }
+  100% { background-color: transparent; }
+}
+
+.price-flash-up {
+  animation: price-flash-up 0.5s ease-in-out;
+}
+
+.price-flash-down {
+  animation: price-flash-down 0.5s ease-in-out;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    @apply text-black bg-white;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .trading-card {
+    @apply border-2;
+  }
+  
+  .trading-button-primary {
+    @apply border-2 border-white;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

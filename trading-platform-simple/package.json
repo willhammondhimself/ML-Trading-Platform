@@ -1,0 +1,38 @@
+{
+  "name": "trading-platform",
+  "version": "1.0.0",
+  "description": "Modern ML-powered trading platform",
+  "private": true,
+  "scripts": {
+    "dev": "docker-compose up --build",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:notebooks": "cd ml-notebooks && jupyter lab",
+    "build": "docker-compose build",
+    "start": "docker-compose up",
+    "stop": "docker-compose down",
+    "clean": "docker-compose down -v --rmi all",
+    "install:all": "npm run install:frontend && npm run install:backend",
+    "install:frontend": "cd frontend && npm install",
+    "install:backend": "cd backend && npm install",
+    "logs": "docker-compose logs -f",
+    "ps": "docker-compose ps"
+  },
+  "keywords": [
+    "trading",
+    "machine-learning",
+    "react",
+    "nextjs",
+    "typescript",
+    "express",
+    "websocket",
+    "financial",
+    "portfolio"
+  ],
+  "author": "Trading Platform Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}

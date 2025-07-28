@@ -1,0 +1,390 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: datadog-agent
+  namespace: ml-trading-platform
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: datadog-agent
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - services
+  - events
+  - endpoints
+  - pods
+  - nodes
+  - componentstatuses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - "quota.openshift.io"
+  resources:
+  - clusterresourcequotas
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - "autoscaling"
+  resources:
+  - horizontalpodautoscalers
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  resourceNames:
+  - datadogtoken
+  - datadog-leader-election
+  verbs:
+  - get
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - create
+- nonResourceURLs:
+  - "/version"
+  - "/healthz"
+  verbs:
+  - get
+- apiGroups:
+  - "apps"
+  resources:
+  - deployments
+  - replicasets
+  - daemonsets
+  verbs:
+  - list
+  - get
+  - watch
+- apiGroups:
+  - "batch"
+  resources:
+  - cronjobs
+  - jobs
+  verbs:
+  - list
+  - get
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: datadog-agent
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: datadog-agent
+subjects:
+- kind: ServiceAccount
+  name: datadog-agent
+  namespace: ml-trading-platform
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: datadog-secret
+  namespace: ml-trading-platform
+type: Opaque
+data:
+  api-key: ${DD_API_KEY_BASE64} # base64 encoded DataDog API key
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: datadog-config
+  namespace: ml-trading-platform
+data:
+  datadog.yaml: |
+    api_key: ${DD_API_KEY}
+    site: datadoghq.com
+    hostname: ml-trading-k8s
+    tags:
+      - env:production
+      - service:ml-trading-platform
+      - version:1.0.0
+      - compliance:financial-services
+      - platform:kubernetes
+    
+    logs_enabled: true
+    logs_config:
+      container_collect_all: true
+      auto_multi_line_detection: true
+      processing_rules:
+        - type: mask_sequences
+          name: mask_financial_data
+          pattern: '(?i)(balance|amount|price|total|profit|loss|cost):\s*[\d,.]+'
+          replace_placeholder: '[REDACTED]'
+    
+    apm_config:
+      enabled: true
+      env: production
+      service: ml-trading-platform
+      receiver_timeout: 30s
+      max_traces_per_second: 100
+    
+    process_config:
+      enabled: true
+    
+    kubernetes_kubelet_host: ${DD_KUBERNETES_KUBELET_HOST}
+    kubernetes_kubeconfig_path: /etc/kubernetes/kubelet.conf
+    
+    cluster_checks:
+      enabled: true
+    
+    orchestrator_explorer:
+      enabled: true
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: datadog-agent
+  namespace: ml-trading-platform
+  labels:
+    app: datadog-agent
+spec:
+  selector:
+    matchLabels:
+      app: datadog-agent
+  template:
+    metadata:
+      labels:
+        app: datadog-agent
+      annotations:
+        ad.datadoghq.com/agent.logs: '[{"source": "datadog-agent", "service": "agent"}]'
+    spec:
+      serviceAccountName: datadog-agent
+      hostNetwork: true
+      hostPID: true
+      containers:
+      - name: agent
+        image: gcr.io/datadoghq/agent:7
+        env:
+        - name: DD_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: datadog-secret
+              key: api-key
+        - name: DD_KUBERNETES_KUBELET_HOST
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: DD_SITE
+          value: "datadoghq.com"
+        - name: DD_ENV
+          value: "production"
+        - name: DD_SERVICE
+          value: "ml-trading-platform"
+        - name: DD_VERSION
+          value: "1.0.0"
+        - name: DD_TAGS
+          value: "compliance:financial-services platform:kubernetes"
+        - name: DD_LOGS_ENABLED
+          value: "true"
+        - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
+          value: "true"
+        - name: DD_APM_ENABLED
+          value: "true"
+        - name: DD_APM_NON_LOCAL_TRAFFIC
+          value: "true"
+        - name: DD_PROCESS_AGENT_ENABLED
+          value: "true"
+        - name: DD_SYSTEM_PROBE_ENABLED
+          value: "true"
+        - name: DD_ORCHESTRATOR_EXPLORER_ENABLED
+          value: "true"
+        - name: DD_CLUSTER_CHECKS_ENABLED
+          value: "true"
+        - name: DD_EXTRA_CONFIG_PROVIDERS
+          value: "clusterchecks endpointschecks"
+        - name: DD_EXTRA_LISTENERS
+          value: "kubelet"
+        - name: DD_HEALTH_PORT
+          value: "5555"
+        
+        # Security context for financial services
+        securityContext:
+          runAsUser: 0
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            add:
+            - SYS_ADMIN
+            - SYS_RESOURCE
+            - SYS_PTRACE
+            - NET_ADMIN
+            - NET_BROADCAST
+            - NET_RAW
+            - IPC_LOCK
+            - CHOWN
+        
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        
+        ports:
+        - containerPort: 8125
+          hostPort: 8125
+          name: dogstatsdport
+          protocol: UDP
+        - containerPort: 8126
+          hostPort: 8126
+          name: traceport
+          protocol: TCP
+        - containerPort: 5555
+          name: healthport
+          protocol: TCP
+        
+        livenessProbe:
+          httpGet:
+            path: /live
+            port: 5555
+          initialDelaySeconds: 15
+          periodSeconds: 15
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+        
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 5555
+          initialDelaySeconds: 15
+          periodSeconds: 15
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+        
+        volumeMounts:
+        - name: config
+          mountPath: /etc/datadog-agent/datadog.yaml
+          subPath: datadog.yaml
+        - name: dockersocket
+          mountPath: /var/run/docker.sock
+          readOnly: true
+        - name: procdir
+          mountPath: /host/proc
+          readOnly: true
+        - name: cgroups
+          mountPath: /host/sys/fs/cgroup
+          readOnly: true
+        - name: tmpdir
+          mountPath: /tmp
+        - name: logdir
+          mountPath: /var/log/datadog
+        
+      volumes:
+      - name: config
+        configMap:
+          name: datadog-config
+      - name: dockersocket
+        hostPath:
+          path: /var/run/docker.sock
+      - name: procdir
+        hostPath:
+          path: /proc
+      - name: cgroups
+        hostPath:
+          path: /sys/fs/cgroup
+      - name: tmpdir
+        emptyDir: {}
+      - name: logdir
+        emptyDir: {}
+      
+      tolerations:
+      - operator: Exists
+      
+      nodeSelector:
+        kubernetes.io/arch: amd64
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: datadog-agent
+  namespace: ml-trading-platform
+  labels:
+    app: datadog-agent
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8125
+    protocol: UDP
+    targetPort: 8125
+    name: dogstatsd
+  - port: 8126
+    protocol: TCP
+    targetPort: 8126
+    name: trace
+  selector:
+    app: datadog-agent
+---
+# Cluster checks for trading platform monitoring
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: datadog-cluster-checks
+  namespace: ml-trading-platform
+data:
+  http_check.yaml: |
+    cluster_check: true
+    init_config:
+    instances:
+      - name: trading-service-health
+        url: http://trading-service:3000/health
+        tags:
+          - service:trading
+          - component:health-check
+        timeout: 5
+        
+      - name: market-data-service-health
+        url: http://market-data-service:3001/health
+        tags:
+          - service:market-data
+          - component:health-check
+        timeout: 5
+        
+      - name: ml-analytics-service-health
+        url: http://ml-analytics-service:8000/health
+        tags:
+          - service:ml-analytics
+          - component:health-check
+        timeout: 5
+  
+  postgres.yaml: |
+    cluster_check: true
+    init_config:
+    instances:
+      - host: postgres
+        port: 5432
+        username: datadog
+        password: ${DD_POSTGRES_PASSWORD}
+        dbname: trading_platform
+        tags:
+          - db:postgres
+          - service:database
+          - component:storage
+        custom_queries:
+          - metric_prefix: trading.orders
+            query: SELECT COUNT(*) as count FROM orders WHERE status = 'OPEN'
+            columns:
+              - name: count
+                type: gauge
+          - metric_prefix: trading.positions
+            query: SELECT COUNT(*) as count FROM positions
+            columns:
+              - name: count
+                type: gauge

@@ -1,0 +1,353 @@
+name: Security Audit
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # Daily at 6 AM UTC
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  # Dependency vulnerability scanning
+  dependency-scan:
+    name: Dependency Vulnerability Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run npm audit
+      run: |
+        npm audit --audit-level high --json > npm-audit.json || true
+        npm audit --audit-level high
+
+    - name: Upload npm audit results
+      uses: actions/upload-artifact@v3
+      with:
+        name: npm-audit-results
+        path: npm-audit.json
+
+    - name: Run Snyk to check for vulnerabilities
+      uses: snyk/actions/node@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        args: --severity-threshold=high --json-file-output=snyk-results.json
+
+    - name: Upload Snyk results to GitHub Code Scanning
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: snyk-results.sarif
+
+  # SAST (Static Application Security Testing)
+  sast-scan:
+    name: Static Application Security Testing
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: javascript, typescript
+        queries: security-extended,security-and-quality
+
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v3
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:javascript"
+
+    - name: Run Semgrep
+      uses: returntocorp/semgrep-action@v1
+      with:
+        config: >-
+          p/security-audit
+          p/secrets
+          p/owasp-top-ten
+          p/javascript
+          p/typescript
+      env:
+        SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+
+  # Secrets scanning
+  secrets-scan:
+    name: Secrets Scanning
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Run TruffleHog OSS
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: main
+        head: HEAD
+        extra_args: --debug --only-verified
+
+    - name: Run GitLeaks
+      uses: gitleaks/gitleaks-action@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+
+  # Container security scanning
+  container-scan:
+    name: Container Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Build Docker image
+      run: docker build -t trading-platform:latest .
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'trading-platform:latest'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+    - name: Run Grype vulnerability scanner
+      uses: anchore/scan-action@v3
+      with:
+        image: 'trading-platform:latest'
+        fail-build: true
+        severity-cutoff: high
+
+  # Infrastructure security scanning
+  infrastructure-scan:
+    name: Infrastructure Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run Checkov
+      id: checkov
+      uses: bridgecrewio/checkov-action@master
+      with:
+        directory: .
+        framework: dockerfile,secrets,github_actions
+        output_format: sarif
+        output_file_path: reports/results.sarif
+        download_external_modules: true
+
+    - name: Upload Checkov scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: reports/results.sarif
+
+    - name: Run Hadolint (Dockerfile linter)
+      uses: hadolint/hadolint-action@v3.1.0
+      with:
+        dockerfile: Dockerfile
+        format: sarif
+        output-file: hadolint-results.sarif
+        no-color: true
+
+    - name: Upload Hadolint scan results
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: hadolint-results.sarif
+
+  # License compliance
+  license-scan:
+    name: License Compliance
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Check licenses
+      run: |
+        npx license-checker --json --out licenses.json
+        npx license-checker --summary
+
+    - name: Upload license report
+      uses: actions/upload-artifact@v3
+      with:
+        name: license-report
+        path: licenses.json
+
+  # Security policy compliance
+  compliance-check:
+    name: Security Policy Compliance
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Check security policy files
+      run: |
+        echo "Checking required security files..."
+        
+        # Check for SECURITY.md
+        if [ ! -f "SECURITY.md" ]; then
+          echo "❌ SECURITY.md not found"
+          exit 1
+        else
+          echo "✅ SECURITY.md found"
+        fi
+        
+        # Check for proper .gitignore
+        if [ ! -f ".gitignore" ]; then
+          echo "❌ .gitignore not found"
+          exit 1
+        else
+          echo "✅ .gitignore found"
+          
+          # Check for sensitive patterns in .gitignore
+          if ! grep -q "\.env" .gitignore; then
+            echo "❌ .env not ignored in .gitignore"
+            exit 1
+          fi
+          
+          if ! grep -q "node_modules" .gitignore; then
+            echo "❌ node_modules not ignored in .gitignore"
+            exit 1
+          fi
+        fi
+
+    - name: Check for hardcoded secrets (basic patterns)
+      run: |
+        echo "Checking for potential hardcoded secrets..."
+        
+        # Check for common secret patterns (excluding test files)
+        if grep -r -E "(password|secret|key|token)\s*[:=]\s*['\"][^'\"]{8,}" --include="*.js" --include="*.ts" --exclude-dir=node_modules --exclude-dir=tests . | grep -v "placeholder\|example\|test"; then
+          echo "❌ Potential hardcoded secrets found"
+          exit 1
+        else
+          echo "✅ No obvious hardcoded secrets found"
+        fi
+
+  # Generate security report
+  security-report:
+    name: Generate Security Report
+    runs-on: ubuntu-latest
+    needs: [dependency-scan, sast-scan, secrets-scan, container-scan, infrastructure-scan, license-scan, compliance-check]
+    if: always()
+    
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+
+    - name: Generate security summary
+      run: |
+        echo "# Security Scan Summary" > security-summary.md
+        echo "" >> security-summary.md
+        echo "## Scan Results" >> security-summary.md
+        echo "" >> security-summary.md
+        
+        # Check job results
+        if [ "${{ needs.dependency-scan.result }}" == "success" ]; then
+          echo "✅ Dependency Scan: PASSED" >> security-summary.md
+        else
+          echo "❌ Dependency Scan: FAILED" >> security-summary.md
+        fi
+        
+        if [ "${{ needs.sast-scan.result }}" == "success" ]; then
+          echo "✅ SAST Scan: PASSED" >> security-summary.md
+        else
+          echo "❌ SAST Scan: FAILED" >> security-summary.md
+        fi
+        
+        if [ "${{ needs.secrets-scan.result }}" == "success" ]; then
+          echo "✅ Secrets Scan: PASSED" >> security-summary.md
+        else
+          echo "❌ Secrets Scan: FAILED" >> security-summary.md
+        fi
+        
+        if [ "${{ needs.container-scan.result }}" == "success" ]; then
+          echo "✅ Container Scan: PASSED" >> security-summary.md
+        else
+          echo "❌ Container Scan: FAILED" >> security-summary.md
+        fi
+        
+        if [ "${{ needs.infrastructure-scan.result }}" == "success" ]; then
+          echo "✅ Infrastructure Scan: PASSED" >> security-summary.md
+        else
+          echo "❌ Infrastructure Scan: FAILED" >> security-summary.md
+        fi
+        
+        if [ "${{ needs.license-scan.result }}" == "success" ]; then
+          echo "✅ License Compliance: PASSED" >> security-summary.md
+        else
+          echo "❌ License Compliance: FAILED" >> security-summary.md
+        fi
+        
+        if [ "${{ needs.compliance-check.result }}" == "success" ]; then
+          echo "✅ Compliance Check: PASSED" >> security-summary.md
+        else
+          echo "❌ Compliance Check: FAILED" >> security-summary.md
+        fi
+        
+        echo "" >> security-summary.md
+        echo "Generated on: $(date -u)" >> security-summary.md
+
+    - name: Upload security summary
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-summary
+        path: security-summary.md
+
+    - name: Comment PR with security summary
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const summary = fs.readFileSync('security-summary.md', 'utf8');
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: summary
+          });

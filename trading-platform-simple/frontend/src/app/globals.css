@@ -1,0 +1,186 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+:root {
+  --trading-bg-primary: #0a0a0a;
+  --trading-bg-secondary: #141414;
+  --trading-bg-tertiary: #1a1a1a;
+  --trading-text-primary: #ffffff;
+  --trading-text-secondary: #a3a3a3;
+  --trading-text-muted: #525252;
+  --trading-accent-blue: #3b82f6;
+  --trading-success: #10b981;
+  --trading-error: #ef4444;
+  --trading-warning: #f59e0b;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  color: var(--trading-text-primary);
+  background: var(--trading-bg-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+/* Trading-specific styles */
+.trading-mono {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+.trading-glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.trading-gradient {
+  background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--trading-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--trading-text-muted);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--trading-text-secondary);
+}
+
+/* Animation utilities */
+.animate-pulse-price {
+  animation: pulse-price 0.5s ease-in-out;
+}
+
+@keyframes pulse-price {
+  0% { background-color: transparent; }
+  50% { background-color: rgba(59, 130, 246, 0.2); }
+  100% { background-color: transparent; }
+}
+
+.price-up {
+  color: var(--trading-success);
+}
+
+.price-down {
+  color: var(--trading-error);
+}
+
+.price-neutral {
+  color: var(--trading-text-secondary);
+}
+
+/* Loading states */
+.skeleton {
+  background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Chart container */
+.chart-container {
+  background: var(--trading-bg-tertiary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+/* Table styles */
+.trading-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.trading-table th,
+.trading-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.trading-table th {
+  font-weight: 600;
+  color: var(--trading-text-secondary);
+  font-size: 0.875rem;
+}
+
+.trading-table tr:hover {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* Button variants */
+.btn-primary {
+  background: var(--trading-accent-blue);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+.btn-success {
+  background: var(--trading-success);
+  color: white;
+}
+
+.btn-success:hover {
+  background: #059669;
+}
+
+.btn-danger {
+  background: var(--trading-error);
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .trading-sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  
+  .trading-sidebar.open {
+    transform: translateX(0);
+  }
+}
+
+/* Dark mode overrides */
+.dark {
+  color-scheme: dark;
+}

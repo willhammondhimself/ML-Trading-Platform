@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  # Frontend - Next.js Application
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_WS_URL=ws://localhost:8000
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend/src
+          target: /app/src
+        - action: rebuild
+          path: ./frontend/package.json
+
+  # Backend - Express.js API
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - NODE_ENV=development
+      - PORT=8000
+      - FRONTEND_URL=http://localhost:3000
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - /app/dist
+    develop:
+      watch:
+        - action: sync
+          path: ./backend/src
+          target: /app/src
+        - action: rebuild
+          path: ./backend/package.json
+
+  # Redis for caching and session storage
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+  # ML Notebooks - Jupyter Lab
+  ml-notebooks:
+    build:
+      context: ./ml-notebooks
+      dockerfile: Dockerfile
+    ports:
+      - "8888:8888"
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - JUPYTER_TOKEN=trading-platform
+    volumes:
+      - ./ml-notebooks:/home/jovyan/work
+      - ./backend/src/types:/home/jovyan/work/shared/types
+    command: start-notebook.sh --NotebookApp.token='trading-platform' --NotebookApp.password=''
+
+volumes:
+  redis_data:
+
+networks:
+  default:
+    driver: bridge

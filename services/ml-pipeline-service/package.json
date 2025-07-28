@@ -1,0 +1,44 @@
+{
+  "name": "@ml-trading/ml-pipeline-service",
+  "version": "1.0.0",
+  "description": "ML Pipeline service for feature engineering, model training, and inference",
+  "private": true,
+  "scripts": {
+    "dev": "./venv/bin/python -m uvicorn src.main:app --reload --host 0.0.0.0 --port 8002",
+    "start": "./venv/bin/python -m uvicorn src.main:app --host 0.0.0.0 --port 8002",
+    "test": "./venv/bin/python -m pytest tests/ -v",
+    "test:coverage": "./venv/bin/python -m pytest tests/ --cov=src --cov-report=html",
+    "lint": "./venv/bin/python -m flake8 src tests",
+    "lint:fix": "./venv/bin/python -m black src tests && ./venv/bin/python -m isort src tests",
+    "type-check": "./venv/bin/python -m mypy src",
+    "setup": "./venv/bin/pip install -r requirements.txt",
+    "setup:dev": "./venv/bin/pip install -r requirements-dev.txt",
+    "docker:build": "docker build -t ml-pipeline-service .",
+    "docker:run": "docker run -p 8002:8002 ml-pipeline-service",
+    "migrate": "./venv/bin/python -m alembic upgrade head",
+    "migrate:create": "./venv/bin/python -m alembic revision --autogenerate",
+    "train": "./venv/bin/python -m src.training.train_models",
+    "serve": "./venv/bin/python -m src.inference.model_server"
+  },
+  "keywords": [
+    "machine-learning",
+    "trading",
+    "feature-engineering",
+    "model-training",
+    "inference",
+    "fintech",
+    "python",
+    "fastapi"
+  ],
+  "author": "ML Trading Platform Team",
+  "license": "MIT",
+  "engines": {
+    "python": ">=3.11.0"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "python": {
+    "requirements": "./requirements.txt",
+    "dev_requirements": "./requirements-dev.txt"
+  }
+}

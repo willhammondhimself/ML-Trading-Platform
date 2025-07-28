@@ -1,0 +1,145 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: ml-trading-platform
+data:
+  POSTGRES_DB: "trading_platform"
+  POSTGRES_USER: "trading_user"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-secret
+  namespace: ml-trading-platform
+type: Opaque
+data:
+  POSTGRES_PASSWORD: dHJhZGluZ19wYXNzd29yZA== # base64 encoded "trading_password"
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  namespace: ml-trading-platform
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: ml-trading-platform
+  labels:
+    app: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:16-alpine
+        ports:
+        - containerPort: 5432
+        envFrom:
+        - configMapRef:
+            name: postgres-config
+        - secretRef:
+            name: postgres-secret
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+        - name: init-scripts
+          mountPath: /docker-entrypoint-initdb.d
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - trading_user
+            - -d
+            - trading_platform
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - trading_user
+            - -d
+            - trading_platform
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: postgres-pvc
+      - name: init-scripts
+        configMap:
+          name: postgres-init-scripts
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: ml-trading-platform
+  labels:
+    app: postgres
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5432
+    targetPort: 5432
+    protocol: TCP
+  selector:
+    app: postgres
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-scripts
+  namespace: ml-trading-platform
+data:
+  init.sql: |
+    -- PostgreSQL initialization script for ML Trading Platform
+
+    -- Create databases for different services
+    CREATE DATABASE trading_service;
+    CREATE DATABASE user_service;
+    CREATE DATABASE risk_service;
+    CREATE DATABASE reporting_service;
+
+    -- Create users for different services
+    CREATE USER trading_user WITH PASSWORD 'trading_password';
+    CREATE USER user_service_user WITH PASSWORD 'user_service_password';
+    CREATE USER risk_service_user WITH PASSWORD 'risk_service_password';
+    CREATE USER reporting_service_user WITH PASSWORD 'reporting_service_password';
+
+    -- Grant privileges
+    GRANT ALL PRIVILEGES ON DATABASE trading_service TO trading_user;
+    GRANT ALL PRIVILEGES ON DATABASE user_service TO user_service_user;
+    GRANT ALL PRIVILEGES ON DATABASE risk_service TO risk_service_user;
+    GRANT ALL PRIVILEGES ON DATABASE reporting_service TO reporting_service_user;
