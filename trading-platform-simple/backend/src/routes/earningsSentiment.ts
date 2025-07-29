@@ -510,7 +510,7 @@ router.get('/health', (req, res) => {
     const health = {
       status: 'healthy',
       callsTracked: calls.length,
-      analysesGenerated: analyses.length,
+      analysesProcessed: analyses.length,
       alertsActive: alerts.filter(a => !a.acknowledged).length,
       totalAlerts: alerts.length,
       executiveProfiles: executives.length,

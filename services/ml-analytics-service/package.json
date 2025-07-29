@@ -17,7 +17,7 @@
     "clean": "rimraf dist coverage",
     "docker:build": "docker build -t ml-analytics-service .",
     "docker:run": "docker run -p 8001:8001 ml-analytics-service",
-    "proto:generate": "pbjs -t static-module -w commonjs -o src/proto/generated.js src/proto/*.proto && pbts -o src/proto/generated.d.ts src/proto/generated.js"
+    "proto:compile": "pbjs -t static-module -w commonjs -o src/proto/compiled.js src/proto/*.proto && pbts -o src/proto/compiled.d.ts src/proto/compiled.js"
   },
   "dependencies": {
     "@ml-trading/domain": "workspace:*",
