@@ -6,9 +6,15 @@ export const metadata: Metadata = {
   description: 'Modern trading platform with real-time market data, ML predictions, and advanced analytics',
   keywords: ['trading', 'machine learning', 'stock market', 'portfolio', 'analytics'],
   authors: [{ name: 'Trading Platform Team' }],
-  viewport: 'width=device-width, initial-scale=1',
-  themeColor: '#0a0a0a',
 };
+
+export function generateViewport() {
+  return {
+    width: 'device-width',
+    initialScale: 1,
+    themeColor: '#0a0a0a',
+  };
+}
 
 export default function RootLayout({
   children,
